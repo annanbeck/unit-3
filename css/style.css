@@ -1,17 +1,19 @@
-.axis path,
-.axis line {
-    fill: none;
-    stroke: black;
-    stroke-width: 1px;
-    shape-rendering: crispEdges;
-}
 
-.axis text {
-    font-family: sans-serif;
-    font-size: 0.9em;
+.lakes {
+    fill: #FFF;
+    stroke: black;
+    stroke-width: 2px;
 }
-.title {
-    font-family: sans-serif;
-    font-size: 1.5em;
-    font-weight: bold;
+.path {
+    fill: #FFF;
+    stroke: black;
+    stroke-width: 2px;
+}
+.regions {
+    fill: rgb(131, 129, 129);
+    stroke: #CCC;
+    stroke-width: .5px;
+}
+.map {
+    border: medium solid #999;
 }
