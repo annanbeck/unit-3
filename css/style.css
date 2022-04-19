@@ -1,6 +1,6 @@
 
 .lakes {
-    fill: #FFF;
+    fill: #f1f2f2;
     stroke: black;
     stroke-width: 2px;
 }
@@ -15,7 +15,10 @@
     stroke-width: .5px;
 }
 .map {
-    border: medium solid #999;
+    border: medium solid #58595b;
+}
+.mapBackground {
+    fill: lightgrey
 }
 .numbers {
     fill: white;
@@ -27,7 +30,7 @@
 }
 .chart {
     float: right;
-    margin: 7px 20px 0 0;
+    margin: -4px 0px 0 0;
 }
 
 .chartTitle {
@@ -42,7 +45,7 @@
 
 .chartFrame {
     fill: none;
-    stroke: #999;
+    stroke: #58595b;
     stroke-width: 3px;
     shape-rendering: crispEdges;
 }
@@ -57,6 +60,49 @@
 
 .axis text {
     font-family: sans-serif;
-    font-size: 0.8em;
-    fill: #999;
+    font-size: 1em;
+    fill: black;
 }
+
+.dropdown {
+    position: absolute;
+    top: 30px;
+    left: 40px;
+    z-index: 10;
+    font-family: sans-serif;
+    font-size: 1em;
+    font-weight: normal;
+    padding: 2px;
+    border: 1px solid #999;
+    box-shadow: 2px 2px 4px #999;
+}
+
+option {
+    font-weight: normal;
+}
+.infolabel {
+    position: absolute;
+    height: 50px;
+    min-width: 100px;
+    color: black;
+    background-color: #1abc9c;
+    border: solid thin #fff;
+    padding: 5px 10px;
+}
+
+.infolabel h1 {
+    font-family: sans-serif;
+    margin: 0 20px 0 0;
+    padding: 0;
+    display: inline-block;
+    line-height: 1em;
+}
+
+.header {
+    font-family: sans-serif;
+    padding: 10px;
+    text-align: center;
+    background: #1abc9c;
+    color: black;
+    font-size: 12px;
+  }

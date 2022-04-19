@@ -7,7 +7,7 @@
 
     var chartWidth = window.innerWidth * 0.425,
         chartHeight = 473,
-        leftPadding = 25,
+        leftPadding = 55,
         rightPadding = 2,
         topBottomPadding = 5,
         chartInnerWidth = chartWidth - leftPadding - rightPadding,
@@ -47,7 +47,7 @@
 
         var path = d3.geoPath().projection(projection);
         //use Promise.all to parallelize asynchronous data loading
-        var promises = [d3.csv("data/WI_ENVI.csv"),
+        var promises = [d3.csv("data/WI_ENVI_1.csv"),
         d3.json("data/wi_counties.topojson"),
         d3.json("data/wi_lakes.topojson"),
         d3.json("data/wi_states.topojson"),
@@ -65,6 +65,19 @@
             var wi_counties = topojson.feature(counties, counties.objects.wi_counties).features,
                 wi_lakes = topojson.feature(lakes, lakes.objects.wi_lakes),
                 wi_states = topojson.feature(states, states.objects.wi_states);
+
+            //add Europe countries to map
+            /*var states = map
+                .append("path")
+                .datum(wi_states)
+                .attr("class", "states")
+                .attr("d", path);*/
+            
+            /*var lakes = map
+                .append("path")
+                .datum(wi_lakes)
+                .attr("class", "lakes")
+                .attr("d", path);*/
 
             wi_counties = joinData(wi_counties, csvData);
 
@@ -109,15 +122,16 @@
 
     function makeColorScale(data) {
         var colorClasses = [
-            "#018571",
-            "#80cdc1",
-            "#f5f5f5",
-            "#dfc27d",
-            "#a6611a"
+            "#cdeff7",
+            "#b2e2e2",
+            "#66c2a4",
+            "#2ca25f",
+            "#006d2c"
         ];
 
         //create color scale generator
-        var colorScale = d3.scaleThreshold()
+       //create color scale generator
+        var colorScale = d3.scaleQuantile()
             .range(colorClasses);
 
         //build array of all values of the expressed attribute
@@ -127,14 +141,7 @@
             domainArray.push(val);
         };
 
-        //cluster data using ckmeans clustering algorithm to create natural breaks
-        var clusters = ss.ckmeans(domainArray, 5);
-        //reset domain array to cluster minimums
-        domainArray = clusters.map(function (d) {
-            return d3.min(d);
-        });
-        //remove first value from domain array to create class breakpoints
-        domainArray.shift();
+        
 
         //assign array of last 4 cluster minimums as domain
         colorScale.domain(domainArray);
@@ -155,12 +162,13 @@
                 return colorScale(d.properties[expressed]);
             })
             .on("mouseover", function (event, d) {
+                setLabel(d.properties);
                 highlight(d.properties);
             })
             .on("mouseout", function (event, d) {
                 dehighlight(d.properties);
             })
-            //.on("mousemove", moveLabel);
+            .on("mousemove", moveLabel);
     };
 
     //function to create coordinated bar chart
@@ -195,19 +203,17 @@
             })
             .attr("width", chartInnerWidth / csvData.length - 1)
             .on("mouseover", function (event, d) {
+                setLabel(d);
                 highlight(d);
             })
             .on("mouseout", function (event, d) {
-                dehighlight(d.properties);
-                    //.on("mousemove", moveLabel);
+                dehighlight(d.properties)
             })
-            .on("click", function (event, d){
-                popup(d.properties)
-            });
+            .on("mousemove", moveLabel);
 
         //create a text element for the chart title
         var chartTitle = chart.append("text")
-            .attr("x", 40)
+            .attr("x", 100)
             .attr("y", 40)
             .attr("class", "chartTitle")
             .text("The percent of farms that are organic " + expressed[3] + " in each county");
@@ -319,10 +325,22 @@
         })
             //size/resize bars
             .attr("height", function (d, i) {
-                return 463 - yScale(parseFloat(d[expressed]));
+                var value = d[expressed];
+                if (value) {
+                    return 463 - yScale(parseFloat(d[expressed]));
+                } else {
+                    return 0;
+                }
+                
             })
             .attr("y", function (d, i) {
-                return yScale(parseFloat(d[expressed])) + topBottomPadding;
+                var value = d[expressed];
+                if (value) {
+                    return yScale(parseFloat(d[expressed])) + topBottomPadding;
+                } else {
+                    return 0;
+                }
+               
             })
             //color/recolor bars
             .style("fill", function (d) {
@@ -341,8 +359,8 @@
     function highlight(props) {
         //change stroke
         var selected = d3.selectAll("." + props.NAME)
-            .style("stroke", "blue")
-            .style("stroke-width", "2");
+            .style("stroke", "black")
+            .style("stroke-width", "3");
     };
 
     //function to reset the element style on mouseout
@@ -359,22 +377,46 @@
         d3.select(".infolabel").remove();
     };
 
-    function popup(props) {
+    //function to create dynamic label
+    function setLabel(props){
         //label content
-        var popupAttribute = "<h1>" + props[expressed] +
+        var labelAttribute = "<h1>" + props[expressed] +
             "</h1><b>" + expressed + "</b>";
 
         //create info label div
-        var infopopup = d3.select("body")
+        var infolabel = d3.select("body")
             .append("div")
             .attr("class", "infolabel")
             .attr("id", props.NAME + "_label")
-            .html(popupAttribute);
+            .html(labelAttribute);
 
         var regionName = infolabel.append("div")
             .attr("class", "labelname")
             .html(props.NAME);
-    }
+    };
+
+    function moveLabel(){
+        //get width of label
+        var labelWidth = d3.select(".infolabel")
+            .node()
+            .getBoundingClientRect()
+            .width;
+    
+        //use coordinates of mousemove event to set label coordinates
+        var x1 = event.clientX + 10,
+            y1 = event.clientY - 75,
+            x2 = event.clientX - labelWidth - 10,
+            y2 = event.clientY + 25;
+    
+        //horizontal label coordinate, testing for overflow
+        var x = event.clientX > window.innerWidth - labelWidth - 20 ? x2 : x1; 
+        //vertical label coordinate, testing for overflow
+        var y = event.clientY < 75 ? y2 : y1; 
+    
+        d3.select(".infolabel")
+            .style("left", x + "px")
+            .style("top", y + "px");
+    };
 
 
 
